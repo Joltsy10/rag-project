@@ -57,7 +57,7 @@ def load_and_chunk(sources: list):
         elif source["type"] == "url":
             docs = load_url(source["path"])
         else:
-            print(f"Unknown source type: {source["type"]}, skipping")
+            print(f"Unknown source type: {source['type']}, skipping")
             continue
 
         all_documents.extend(docs)
