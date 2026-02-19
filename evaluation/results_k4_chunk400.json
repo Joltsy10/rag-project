@@ -1,0 +1,12 @@
+{
+  "config": {
+    "k": 4,
+    "chunk_size": 400,
+    "chunk_overlap": 40
+  },
+  "scores": {
+    "faithfulness": 0.6727272727272727,
+    "answer_relevancy": 0.7909090909090909,
+    "context_recall": 0.6909090909090909
+  }
+}

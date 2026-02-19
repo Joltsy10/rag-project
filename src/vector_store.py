@@ -67,3 +67,9 @@ def get_retriever(k = 4, embedding_model = None):
 
     vector_store = get_vector_store(embedding_model)
     return vector_store.as_retriever(search_kwargs = {"k":k})
+
+def clear_vector_store():
+    import shutil
+    if os.path.exists(CHROMA_PATH):
+        shutil.rmtree(CHROMA_PATH)
+        print("Vector store cleared")

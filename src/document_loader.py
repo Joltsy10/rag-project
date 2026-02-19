@@ -46,7 +46,7 @@ def chunk_documents(documents, chunk_size = 500, chunk_overlap = 50):
     chunks = splitter.split_documents(documents)
     return chunks
 
-def load_and_chunk(sources: list):
+def load_and_chunk(sources: list, chunk_size = 500, chunk_overlap = 50):
     all_documents = []
 
     for source in sources:
@@ -62,7 +62,7 @@ def load_and_chunk(sources: list):
 
         all_documents.extend(docs)
 
-    chunks = chunk_documents(all_documents)
+    chunks = chunk_documents(all_documents, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     print(f"Total number of chunks after splitting: {len(chunks)}")
 
     return chunks

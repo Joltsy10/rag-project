@@ -1,0 +1,57 @@
+[
+    {
+        "question": "What year was the transformer architecture introduced?",
+        "ground_truth": "The transformer architecture was introduced in 2017",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What are the three vectors computed for each token in self-attention?",
+        "ground_truth": "Query vector, key vector, and value vector",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What is the difference between BERT and GPT in terms of architecture?",
+        "ground_truth": "BERT uses only the encoder portion and is trained using masked language modeling. GPT uses only the decoder portion and is trained using next token prediction",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What training objective does BERT use?",
+        "ground_truth": "BERT is trained using masked language modeling",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What is fine-tuning in the context of transformer models?",
+        "ground_truth": "Fine-tuning refers to taking a pretrained transformer model and continuing training on a smaller domain-specific dataset to adapt its general knowledge to a specific task without training from scratch",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What is the computational complexity of attention mechanisms?",
+        "ground_truth": "Attention mechanisms have quadratic complexity with respect to sequence length",
+        "source": "transformers.txt"
+    },
+    {
+        "question": "What is machine learning?",
+        "ground_truth": "Machine learning attempts to tell how to automatically find a good predictor based on past experiences",
+        "source": "learning.pdf"
+    },
+    {
+        "question": "What is overfitting?",
+        "ground_truth": "Overfitting occurs when a model learns the training data too well including its noise, fitting the data perfectly but failing to generalize to new examples",
+        "source": "learning.pdf"
+    },
+    {
+        "question": "What is the role of a training set in machine learning?",
+        "ground_truth": "The training set is used to train the model by providing examples from which the model learns patterns and builds a predictor",
+        "source": "learning.pdf"
+    },
+    {
+        "question": "What is a decision tree?",
+        "ground_truth": "A decision tree is a model that makes predictions by learning simple decision rules inferred from the training data features",
+        "source": "learning.pdf"
+    },
+    {
+        "question": "What is the difference between supervised and unsupervised learning?",
+        "ground_truth": "Supervised learning uses labeled training data where the correct output is provided, while unsupervised learning finds patterns in data without labeled examples",
+        "source": "learning.pdf"
+    }
+]
