@@ -1,6 +1,7 @@
 from langchain_community.vectorstores import Chroma
 from src.embeddings import load_embedding_model
 import os
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
 
 CHROMA_PATH = ".chroma"
 
@@ -40,8 +41,13 @@ def add_documents(chunks, embedding_model = None):
         print("No new documents to add")
         return vector_store
     
+    batch_size = 50
+    for i in range(0, len(new_chunks), batch_size):
+        batch = new_chunks[i:i + batch_size]
+        vector_store.add_documents(batch)
+        print(f"Added batch {i//batch_size + 1}, chunks {i} to {i + len(batch)}")
+    
     print(f"Adding {len(chunks)} new chunks to the vector store")
-    vector_store.add_documents(new_chunks)
 
     print("Done")
     return vector_store
