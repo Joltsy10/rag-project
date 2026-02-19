@@ -6,6 +6,6 @@ __pycache__/
 *.pyc 
 logs/
 models/
-chroma/
+.chroma/
 data/
 ```
