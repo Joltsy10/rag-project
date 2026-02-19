@@ -8,7 +8,7 @@ from langchain_groq import ChatGroq
 from src.vector_store import similarity_search
 from src.rag_chain import ask
 from src.embeddings import load_embedding_model
-
+from src.rag_chain import ask_with_rewrite
 from src.document_loader import load_and_chunk
 from src.vector_store import add_documents, clear_vector_store
 
@@ -27,14 +27,15 @@ def llm_judge(question, answer, context, ground_truth, llm):
     {{
         "faithfulness": <0-1, is the answer supported by the context?>,
         "answer_relevancy": <0-1, does the answer address the question?>,
-        "context_recall": <0-1, does the context contain enough to answer the question?>
+        "context_recall": <0-1, does the context contain enough to answer the question?>,
+        "completeness": <0-1, did the answer actually answer the question with substance? Saying 'I dont know' or 'I dont have enough information' should score 0>
     }}"""
 
     response = llm.invoke(prompt)
     try:
         scores = json.loads(response.content)
     except:
-        scores = {"faithfulness": 0, "answer_relevancy": 0, "context_recall": 0}
+        scores = {"faithfulness": 0, "answer_relevancy": 0, "context_recall": 0, "completeness": 0}
     return scores
 
 def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500, chunk_overlap = 50,  k = 4):
@@ -53,7 +54,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
 
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name = "llama-3.1-8b-instant",
+        model_name = "llama-3.3-70b-versatile",
         temperature=0
     )
 
@@ -75,28 +76,37 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
         print(f"A: {answer[:100]}")
         print(f"Scores: {scores}\n")
 
-    avg_faithfulness = sum(s["faithfulness"] for s in all_scores) / len(all_scores)
-    avg_relevancy = sum(s["answer_relevancy"] for s in all_scores) / len(all_scores)
+    answered = [s for s in all_scores if s["completeness"] > 0.3]
+    unanswered = [s for s in all_scores if s["completeness"] <= 0.3]
+    
+    print(f"\nQuestions answered: {len(answered)}/{len(all_scores)}")
+    print(f"Questions unanswered: {len(unanswered)}/{len(all_scores)}")
+
+    avg_faithfulness = sum(s["faithfulness"] for s in answered) / len(answered) if answered else 0
+    avg_relevancy = sum(s["answer_relevancy"] for s in answered) / len(answered) if answered else 0
     avg_recall = sum(s["context_recall"] for s in all_scores) / len(all_scores)
+    avg_completeness = sum(s["completeness"] for s in all_scores) / len(all_scores)
 
     print("===== AVERAGE SCORES =====")
     print(f"Faithfulness:     {avg_faithfulness:.4f}")
     print(f"Answer Relevancy: {avg_relevancy:.4f}")
     print(f"Context Recall:   {avg_recall:.4f}")
+    print(f"Completeness:     {avg_completeness:.4f}")
 
     results = {
         "config": {"k": k, "chunk_size": chunk_size, "chunk_overlap": chunk_overlap},
         "scores": {
             "faithfulness": avg_faithfulness,
             "answer_relevancy": avg_relevancy,
-            "context_recall": avg_recall
+            "context_recall": avg_recall,
+            "completeness": avg_completeness
         }
     }
 
-    output_path = f"evaluation/results_k{k}_chunk{chunk_size}.json"
+    output_path = f"evaluation/results_k{k}_chunk{chunk_size}_70b.json"
     with open(output_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {output_path}")
 
 if __name__ == "__main__":
-    run_evaluation(k=4, chunk_overlap=40, chunk_size=400)
+    run_evaluation(k=4, chunk_overlap=30, chunk_size=300)
