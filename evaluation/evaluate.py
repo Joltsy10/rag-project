@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from src.vector_store import similarity_search
-from src.rag_chain import ask,ask_V2,ask_V3
+from src.rag_chain import ask,ask_V2,ask_V3,ask_hybrid
 from src.embeddings import load_embedding_model
 from src.rag_chain import ask_with_rewrite
 from src.document_loader import load_and_chunk
@@ -65,7 +65,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
         question = item["question"]
         ground_truth = item["ground_truth"]
 
-        answer = ask_V2(question, embedding_model= embedding_model, k=k)
+        answer = ask_V2(question, chunks, embedding_model= embedding_model, k=k)
         retrieved_docs = similarity_search(question,k=k, embedding_model=embedding_model)
         context = " ".join([doc.page_content for doc in retrieved_docs])
 
@@ -109,4 +109,4 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
     print(f"\nResults saved to {output_path}")
 
 if __name__ == "__main__":
-    run_evaluation(k=4, chunk_overlap=50, chunk_size=500, tag="8b_mmr_promptv3")
+    run_evaluation(k=4, chunk_overlap=50, chunk_size=500, tag="8b_mmr_promptv2")

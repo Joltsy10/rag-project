@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
-from src.vector_store import get_retriever
+from src.vector_store import get_retriever,get_hybrid_retriever
 from langchain.schema.runnable import RunnableLambda
 
 load_dotenv()
@@ -182,4 +182,40 @@ def ask_V3(question, embedding_model = None, k = 4):
     response = chain.invoke(question)
     return response
 
+def create_rag_chain_hybrid(chunks, embedding_model = None, k = 4):
+    
+    retriever = get_hybrid_retriever(chunks, k=k, embedding_model=embedding_model)
+    llm = load_llm()
+
+    prompt_template = """You are an expert assistant that answers questions using ONLY the provided context.
+
+    Rules:
+    1. Base your answer strictly on the context provided. Do not use outside knowledge.
+    2. If the context contains partial information, use what's available and note what's missing.
+    3. Always cite the source document for every claim you make.
+    4. If the context contains no relevant information, say "The provided documents do not contain information about this topic."
+    5. Be concise and specific — avoid vague answers.
+
+    Context:
+    {context}
+
+    Question: {question}
+
+    Answer:"""
+
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+
+    chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    return chain
+
+def ask_hybrid(question, chunks, embedding_model = None, k = 4):
+    chain = create_rag_chain_hybrid(chunks, embedding_model, k=k)
+    response = chain.invoke(question)
+    return response
 

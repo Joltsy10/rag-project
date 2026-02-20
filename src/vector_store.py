@@ -1,4 +1,6 @@
 from langchain_community.vectorstores import Chroma
+from langchain_community.retrievers import BM25Retriever
+from langchain.retrievers import EnsembleRetriever
 from src.embeddings import load_embedding_model
 import os
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
@@ -75,3 +77,23 @@ def clear_vector_store():
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
         print("Vector store cleared")
+
+def get_hybrid_retriever(chunks, k = 4, embedding_model = None):
+    if embedding_model is None:
+        embedding_model = load_embedding_model()
+
+    vector_store = get_vector_store(embedding_model)
+    semantic_retriever= vector_store.as_retriever(
+        search_type = "mmr",
+        search_kwargs={"k":k, "lambda_mult": 0.7, "fetch_k": k*3}
+    )
+
+    bm25_retriever = BM25Retriever.from_documents(documents=chunks)
+    bm25_retriever.k = k
+
+    ensemble_retriever = EnsembleRetriever(
+        retrievers=[semantic_retriever, bm25_retriever],
+        weights=[0.7,0.3]
+    )
+
+    return ensemble_retriever
