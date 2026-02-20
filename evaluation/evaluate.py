@@ -54,7 +54,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
 
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name = "llama-3.1-8b-instant",
+        model_name = "llama-3.3-70b-versatile",
         temperature=0
     )
 
@@ -65,7 +65,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
         question = item["question"]
         ground_truth = item["ground_truth"]
 
-        answer = ask_V2(question, chunks, embedding_model= embedding_model, k=k)
+        answer = ask_V2(question, embedding_model= embedding_model, k=k)
         retrieved_docs = similarity_search(question,k=k, embedding_model=embedding_model)
         context = " ".join([doc.page_content for doc in retrieved_docs])
 
@@ -109,4 +109,4 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
     print(f"\nResults saved to {output_path}")
 
 if __name__ == "__main__":
-    run_evaluation(k=4, chunk_overlap=50, chunk_size=500, tag="8b_mmr_promptv2")
+    run_evaluation(k=4, chunk_overlap=50, chunk_size=500, tag="70b_mmr_promptv2_final")
