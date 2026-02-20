@@ -5,9 +5,9 @@
     "chunk_overlap": 50
   },
   "scores": {
-    "faithfulness": 0.9714285714285714,
-    "answer_relevancy": 1.0,
+    "faithfulness": 0.8777777777777778,
+    "answer_relevancy": 0.9555555555555555,
     "context_recall": 0.7818181818181817,
-    "completeness": 0.5545454545454546
+    "completeness": 0.6818181818181818
   }
 }

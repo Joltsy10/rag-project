@@ -12,7 +12,7 @@ load_dotenv()
 def load_llm():
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name = "llama-3.3-70b-versatile",
+        model_name = "llama-3.1-8b-instant",
         temperature=0,
         max_tokens=1024
     )
@@ -109,3 +109,77 @@ def ask_with_rewrite(question, embedding_model = None, k = 4):
     chain = create_rag_chain_with_rewrite(embedding_model=embedding_model, k = k)
     response = chain.invoke(question)
     return response
+
+def create_rag_chain_V2(embedding_model = None, k = 4):
+    retriever = get_retriever(k=k, embedding_model=embedding_model)
+    llm = load_llm()
+
+    prompt_template = """You are an expert assistant that answers questions using ONLY the provided context.
+
+    Rules:
+    1. Base your answer strictly on the context provided. Do not use outside knowledge.
+    2. If the context contains partial information, use what's available and note what's missing.
+    3. Always cite the source document for every claim you make.
+    4. If the context contains no relevant information, say "The provided documents do not contain information about this topic."
+    5. Be concise and specific — avoid vague answers.
+
+    Context:
+    {context}
+
+    Question: {question}
+
+    Answer:"""
+
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+
+    chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    return chain
+
+def ask_V2(question, embedding_model = None, k = 4):
+    chain = create_rag_chain_V2(embedding_model=embedding_model, k=k)
+    response = chain.invoke(question)
+    return response
+
+def create_rag_chain_V3(embedding_model = None, k = 4):
+    retriever = get_retriever(k=k, embedding_model=embedding_model)
+    llm = load_llm()
+
+    prompt_template = """You are an expert assistant. Follow these steps to answer the question:
+
+    Step 1: Read the provided context carefully.
+    Step 2: Identify which parts of the context are relevant to the question.
+    Step 3: Formulate a precise answer using ONLY the relevant context.
+    Step 4: Cite which source document your answer comes from.
+
+    If no relevant information exists in the context, explicitly state: "The provided documents do not contain information about this topic."
+
+    Context:
+    {context}
+
+    Question: {question}
+
+    Answer:"""
+
+    prompt = ChatPromptTemplate.from_template(prompt_template)
+
+    chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    return chain
+
+def ask_V3(question, embedding_model = None, k = 4):
+    chain = create_rag_chain_V2(embedding_model=embedding_model, k=k)
+    response = chain.invoke(question)
+    return response
+
+

@@ -66,7 +66,9 @@ def get_retriever(k = 4, embedding_model = None):
         embedding_model = load_embedding_model
 
     vector_store = get_vector_store(embedding_model)
-    return vector_store.as_retriever(search_kwargs = {"k":k})
+    return vector_store.as_retriever(
+        search_type = "mmr",
+        search_kwargs = {"k":k, "fetch_k":k*3, "lambda_mult": 0.7})
 
 def clear_vector_store():
     import shutil

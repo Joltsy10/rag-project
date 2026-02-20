@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from src.vector_store import similarity_search
-from src.rag_chain import ask
+from src.rag_chain import ask,ask_V2,ask_V3
 from src.embeddings import load_embedding_model
 from src.rag_chain import ask_with_rewrite
 from src.document_loader import load_and_chunk
@@ -38,7 +38,7 @@ def llm_judge(question, answer, context, ground_truth, llm):
         scores = {"faithfulness": 0, "answer_relevancy": 0, "context_recall": 0, "completeness": 0}
     return scores
 
-def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500, chunk_overlap = 50,  k = 4):
+def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500, chunk_overlap = 50,  k = 4, tag="baseline"):
     with open(test_set_path) as f:
         test_set = json.load(f)
 
@@ -54,7 +54,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
 
     llm = ChatGroq(
         api_key=os.getenv("GROQ_API_KEY"),
-        model_name = "llama-3.3-70b-versatile",
+        model_name = "llama-3.1-8b-instant",
         temperature=0
     )
 
@@ -65,7 +65,7 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
         question = item["question"]
         ground_truth = item["ground_truth"]
 
-        answer = ask(question, embedding_model= embedding_model, k=k)
+        answer = ask_V2(question, embedding_model= embedding_model, k=k)
         retrieved_docs = similarity_search(question,k=k, embedding_model=embedding_model)
         context = " ".join([doc.page_content for doc in retrieved_docs])
 
@@ -103,10 +103,10 @@ def run_evaluation(test_set_path = "evaluation/test_set.json", chunk_size = 500,
         }
     }
 
-    output_path = f"evaluation/results_k{k}_chunk{chunk_size}_70b.json"
+    output_path = f"evaluation/results_{tag}.json"
     with open(output_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to {output_path}")
 
 if __name__ == "__main__":
-    run_evaluation(k=4, chunk_overlap=30, chunk_size=300)
+    run_evaluation(k=4, chunk_overlap=50, chunk_size=500, tag="8b_mmr_promptv3")
