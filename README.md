@@ -164,4 +164,4 @@ docker-compose up --build
 
 ## Related Projects
 
-[Energy Consumption Forecasting](github link): LSTM time series forecasting with FastAPI and Docker
+[Energy Consumption Forecasting]([github link](https://github.com/Joltsy10/Energy-Consumptiom)): LSTM time series forecasting with FastAPI and Docker
